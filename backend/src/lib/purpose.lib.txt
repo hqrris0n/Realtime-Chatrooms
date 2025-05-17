@@ -1,0 +1,2 @@
+The purpose of the files in the lib folder is configuration files for external libraries, such as
+cloudinary and db, or additional functions used in multiple places in utils.js.

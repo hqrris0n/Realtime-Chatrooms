@@ -1,0 +1,1 @@
+The purpose of this to define the "schema" for the "objects" that go into the mongodb.

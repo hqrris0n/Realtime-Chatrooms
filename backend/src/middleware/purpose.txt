@@ -1,0 +1,3 @@
+The purpose of middleware is to take care of processes that happen between two functions in api
+calls. In the routes from route to controller files, there is middleware that is used to check
+if a user is properly logged in.

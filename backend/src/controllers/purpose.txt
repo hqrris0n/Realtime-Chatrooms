@@ -1,0 +1,5 @@
+The purpose of a controller is to manage the specific calls for each "schema". For example,
+the auth.controller.js file manages the different routes in addition to the "api/auth" route.
+Within the controllers, we handle different calls to the database based on what that route should
+do. So far, there are controllers for the auth and message schema that extend from the routes in 
+the routes folder.
