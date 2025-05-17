@@ -3,7 +3,7 @@
 import express from "express"; // Import express library via ES6 module syntax
 
 import authRoutes from "./routes/auth.route.js";
-import messageRoutes from "./routes/auth.route.js";
+import messageRoutes from "./routes/message.route.js";
 import dotenv from "dotenv";
 import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
