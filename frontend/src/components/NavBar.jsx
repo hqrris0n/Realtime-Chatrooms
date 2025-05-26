@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useAuthStore } from "../store/userAuthStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { MessageSquare, LogOut, Settings, User } from "lucide-react";
 
 const NavBar = () => {
@@ -23,7 +23,6 @@ const NavBar = () => {
               <h1 className="text-lg font-bold">The Chatrooms</h1>
             </Link>
           </div>
-
 
           <div className="flex items-center gap-2">
             <Link
