@@ -25,7 +25,7 @@ app.use(
 );
 
 app.use("/api/auth", authRoutes); // use authRoutes from src/routes/auth.route.js for /api/auth endpoint; naming convention for file management
-app.use("/api/message", messageRoutes);
+app.use("/api/messages", messageRoutes);
 
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
