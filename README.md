@@ -1,6 +1,6 @@
 # 🗨️ Real-Time Chatroom
 
-A full-stack real-time chatroom application built using **React**, **Express**, **Node.js**, and **MongoDB**, enabling live messaging via **WebSockets**. This project demonstrates modern full-stack development with cloud deployment, image storage, and secure user authentication.
+A full-stack real-time chatroom application built using **React**, **Express**, **Node.js**, and **MongoDB**, enabling live messaging via **WebSockets**. Includes customizable themes to suit your preference :). This project demonstrates modern full-stack development with cloud deployment, image storage, and secure user authentication.
 
 ## 🚀 Features
 
@@ -22,12 +22,11 @@ A full-stack real-time chatroom application built using **React**, **Express**, 
 - **Deployment**: Render
 - **Testing Tools**: Postman
 
-## 📷 Screenshots
+## 🧰 Usage Instructions
 
-*Coming soon – UI previews of login, chatroom, and image uploads.*
+1. Go to the site:
+https://realtime-chatrooms.onrender.com/login
 
-## 🧰 Setup Instructions
+2. Sign up/Log in and start chatting!
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/real-time-chatroom.git
+   
