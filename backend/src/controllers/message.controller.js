@@ -3,13 +3,14 @@ import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId } from "../lib/socket.js";
 import { io } from "../lib/socket.js";
+import { isImageDataUrl, MAX_MESSAGE_LENGTH } from "../lib/validate.js";
 
 export const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
     const filteredUsers = await User.find({
       _id: { $ne: loggedInUserId },
-    }).select("-password");
+    }).select("fullName profilePic"); // Only what the sidebar shows; don't expose other users' emails
 
     res.status(200).json(filteredUsers);
   } catch (error) {
@@ -42,9 +43,16 @@ export const sendMessage = async (req, res) => {
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
+    if (text !== undefined && (typeof text !== "string" || text.length > MAX_MESSAGE_LENGTH)) {
+      return res.status(400).json({ message: `Messages must be text of at most ${MAX_MESSAGE_LENGTH} characters` });
+    }
+    if (image && !isImageDataUrl(image)) {
+      return res.status(400).json({ message: "Images must be PNG, JPEG, WebP or GIF" });
+    }
+
     let imageURL;
     if (image) {
-      const uploadResponse = await cloudinary.uploader.upload(image);
+      const uploadResponse = await cloudinary.uploader.upload(image, { resource_type: "image" });
       imageURL = uploadResponse.secure_url;
     }
 
