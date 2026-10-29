@@ -23,7 +23,9 @@ export const signup = async (req, res) => {
         .json({ message: "Password must be at least 6 characters long" });
     }
 
-    const user = await User.findOne({ email });
+    // Store emails lowercased; the case-insensitive lookup also catches older mixed-case accounts
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail }).collation({ locale: "en", strength: 2 });
     if (user) return res.status(400).json({ message: "User already exists" });
     //hash password for security
     const salt = await bcrypt.genSalt(10);
@@ -31,7 +33,7 @@ export const signup = async (req, res) => {
 
     const newUser = new User({
       fullName,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -61,7 +63,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const user = await User.findOne({email});
+    const user = await User.findOne({ email: email.trim() }).collation({ locale: "en", strength: 2 });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" }); // intentional generic message

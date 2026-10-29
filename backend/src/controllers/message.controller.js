@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
@@ -48,6 +49,14 @@ export const sendMessage = async (req, res) => {
     }
     if (image && !isImageDataUrl(image)) {
       return res.status(400).json({ message: "Images must be PNG, JPEG, WebP or GIF" });
+    }
+    if (!text?.trim() && !image) {
+      return res.status(400).json({ message: "Message cannot be empty" });
+    }
+
+    // Only deliver to real accounts; also avoids a 500 when the id isn't an ObjectId
+    if (!mongoose.isValidObjectId(receiverId) || !(await User.exists({ _id: receiverId }))) {
+      return res.status(404).json({ message: "Recipient not found" });
     }
 
     let imageURL;
