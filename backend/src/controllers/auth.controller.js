@@ -2,6 +2,7 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
+import { isImageDataUrl } from "../lib/validate.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -11,13 +12,20 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Name and email are required fields." });
     }
 
+    // Reject objects like {"$gt": ""} so they can't act as MongoDB query operators
+    if (typeof fullName !== "string" || typeof email !== "string" || typeof password !== "string") {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+
     if (password.length < 6) {
       return res
         .status(400)
         .json({ message: "Password must be at least 6 characters long" });
     }
 
-    const user = await User.findOne({ email });
+    // Store emails lowercased; the case-insensitive lookup also catches older mixed-case accounts
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail }).collation({ locale: "en", strength: 2 });
     if (user) return res.status(400).json({ message: "User already exists" });
     //hash password for security
     const salt = await bcrypt.genSalt(10);
@@ -25,7 +33,7 @@ export const signup = async (req, res) => {
 
     const newUser = new User({
       fullName,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -50,7 +58,12 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({email});
+    // Reject objects like {"$gt": ""} so they can't act as MongoDB query operators
+    if (typeof email !== "string" || typeof password !== "string") {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const user = await User.findOne({ email: email.trim() }).collation({ locale: "en", strength: 2 });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" }); // intentional generic message
@@ -94,12 +107,17 @@ export const updateProfile = async (req, res) => {
       return res.status(400).json({ message: "Profile picture is required" });
     }
 
+    if (!isImageDataUrl(profilePic)) {
+      return res.status(400).json({ message: "Profile picture must be a PNG, JPEG, WebP or GIF image" });
+    }
+
     // Sends image to cloudinary picture bucket
-    const uploadResponse = await cloudinary.uploader.upload(profilePic);
-    const updatedUser = await User.findByIdAndUpdate(userId, {profilePic: uploadResponse.secure_url}, {new: true});
+    const uploadResponse = await cloudinary.uploader.upload(profilePic, { resource_type: "image" });
+    const updatedUser = await User.findByIdAndUpdate(userId, {profilePic: uploadResponse.secure_url}, {new: true}).select("-password");
     res.status(200).json(updatedUser);
   } catch (error) {
     console.log("Error in updateProfile controller: ", error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 

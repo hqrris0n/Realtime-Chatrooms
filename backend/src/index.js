@@ -8,6 +8,8 @@ import dotenv from "dotenv";
 import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { app, server } from "./lib/socket.js";
 import path from "path";
 
@@ -16,6 +18,29 @@ dotenv.config();
 // process.env. allows us to use environment variables via dotenv
 const PORT = process.env.PORT;
 const __dirname = path.resolve(); // Get the current directory name
+
+app.set("trust proxy", 1); // Render sits in front of the app; use the real client IP for rate limiting
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        // Profile and message images come from Cloudinary; seeded users use randomuser.me; previews are data: URLs
+        "img-src": ["'self'", "data:", "https://res.cloudinary.com", "https://randomuser.me"],
+      },
+    },
+  })
+); // Security headers (CSP, HSTS, no sniffing, no framing)
+
+// Slow down password guessing on login and signup
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 20, // requests per IP per window
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { message: "Too many attempts, please try again later" },
+});
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/signup", authLimiter);
 
 app.use(express.json()); // Middleware to parse JSON data from incoming requests
 app.use(cookieParser()); // Middleware to parse cookies from incoming requests
